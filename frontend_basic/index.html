@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESPOND — Disaster Response Coordination</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h1>🚨 RESPOND</h1>
+      <p>Multimodal Disaster Response Coordination System</p>
+    </div>
+    <div class="header-right">
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>Qdrant Memory Online</span>
+      </div>
+      <div class="last-ingest" id="lastIngestTime">Last ingest: --</div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-container">
+    <!-- Left Panel: Ingest Form -->
+    <section class="panel left-panel">
+      <h2>📥 Ingest Incident</h2>
+      <form id="ingestForm" class="form">
+        <div class="form-group">
+          <label for="text">Incident Description</label>
+          <textarea id="text" placeholder="Describe the incident..." required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="source_type">Source</label>
+            <select id="source_type" required>
+              <option value="social">Social</option>
+              <option value="sensor">Sensor</option>
+              <option value="call">Call</option>
+              <option value="report">Report</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="urgency">Urgency</label>
+            <select id="urgency" required>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status">
+              <option value="pending" selected>Pending</option>
+              <option value="acknowledged">Acknowledged</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="zone_id">Zone ID</label>
+            <input type="text" id="zone_id" placeholder="zone-1" value="zone-1">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="lat">Latitude</label>
+            <input type="number" id="lat" step="0.0001" value="28.6139">
+          </div>
+
+          <div class="form-group">
+            <label for="lon">Longitude</label>
+            <input type="number" id="lon" step="0.0001" value="77.2090">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit Incident</button>
+      </form>
+
+      <div id="ingestResult" class="result-box"></div>
+    </section>
+
+    <!-- Right Panel: Search & Results -->
+    <section class="panel right-panel">
+      <h2>🔍 Search Incidents</h2>
+      <form id="searchForm" class="form">
+        <div class="form-group">
+          <label for="query">Search Query</label>
+          <input type="text" id="query" placeholder="e.g., fire emergency trapped..." required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="search_last_hours">Last Hours</label>
+            <input type="number" id="search_last_hours" value="24">
+          </div>
+
+          <div class="form-group">
+            <label for="search_limit">Limit</label>
+            <input type="number" id="search_limit" value="10">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="search_urgency">Urgency</label>
+            <select id="search_urgency">
+              <option value="">All</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="search_status">Status</label>
+            <select id="search_status">
+              <option value="">All</option>
+              <option value="pending">Pending</option>
+              <option value="acknowledged">Acknowledged</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary">🔍 Search</button>
+          <button type="button" id="recommendBtn" class="btn btn-secondary">🎯 Recommend Actions</button>
+        </div>
+      </form>
+
+      <!-- Results Header -->
+      <div class="results-header" id="resultsHeader" style="display: none;">
+        <h3 id="resultsTitle">0 incidents found</h3>
+        <select class="sort-select" id="sortSelect">
+          <option value="final_score">Sort by: Relevance</option>
+          <option value="confidence_score">Sort by: Confidence</option>
+          <option value="age_seconds">Sort by: Newest</option>
+        </select>
+      </div>
+
+      <!-- Results Section -->
+      <div id="resultsContainer" class="results-container">
+        <div class="empty-state">
+          <div class="empty-state-icon">🔍</div>
+          <p>Enter a search query to find incidents</p>
+        </div>
+      </div>
+
+      <!-- Actions Section -->
+      <div id="actionsSection" class="actions-section hidden">
+        <h3>🎯 Recommended Actions</h3>
+        <div id="actionsContainer" class="actions-container"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
