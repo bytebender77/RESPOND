@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture - RESPOND</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@300;400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="bg-black text-white antialiased overflow-x-hidden">
+    <!-- Background -->
+    <div class="fixed inset-0 -z-30 pointer-events-none">
+        <div class="absolute inset-0 opacity-10">
+            <div
+                class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:3.125rem_3.125rem]">
+            </div>
+        </div>
+        <div class="absolute -top-[10%] -left-[10%] h-[55%] w-[55%] rounded-full bg-blue-900/15 blur-3xl"></div>
+        <div class="absolute -bottom-[10%] -right-[10%] h-[55%] w-[55%] rounded-full bg-purple-900/10 blur-3xl"></div>
+    </div>
+
+    <!-- Animated Aura -->
+    <div class="fixed top-0 w-full h-screen -z-20"
+        style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);">
+        <div data-us-project="hRFfUymDGOHwtFe7evR2" class="absolute w-full h-full left-0 top-0 -z-10"></div>
+        <script>!function () { if (!window.UnicornStudio) { window.UnicornStudio = { isInitialized: !1 }; var i = document.createElement("script"); i.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.5.2/dist/unicornStudio.umd.js", i.onload = function () { window.UnicornStudio.isInitialized || (UnicornStudio.init(), window.UnicornStudio.isInitialized = !0) }, (document.head || document.body).appendChild(i) } }();</script>
+    </div>
+
+    <!-- Nav -->
+    <nav class="fixed top-0 left-0 right-0 z-50 pt-6 px-4">
+        <div
+            class="mx-auto w-full max-w-6xl rounded-full border border-white/10 bg-black/80 backdrop-blur-xl px-6 py-3">
+            <div class="flex items-center justify-between">
+                <a href="index.html" class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white">🚨</div>
+                    <span class="text-lg font-semibold" style="font-family: Oswald;">RESPOND</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="features.html" class="text-xs font-medium text-gray-400 hover:text-white">Features</a>
+                    <a href="architecture.html" class="text-xs font-medium text-white">Architecture</a>
+                    <a href="demo.html" class="text-xs font-medium text-gray-400 hover:text-white">Demo</a>
+                    <a href="tech.html" class="text-xs font-medium text-gray-400 hover:text-white">Tech Stack</a>
+                </div>
+                <a href="frontend/index.html"
+                    class="rounded-full bg-white text-black px-5 py-2 text-xs font-semibold">Dashboard →</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 mx-auto w-full max-w-6xl pt-32 px-6 pb-20">
+        <!-- Header -->
+        <div class="text-center mb-16">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 mb-6">
+                <span class="text-xs text-blue-400 font-medium">System Design</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-light mb-6" style="font-family: Oswald;">
+                System <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Architecture</span>
+            </h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Qdrant powers the core intelligence — not just storage, but
+                evolving situational memory.</p>
+        </div>
+
+        <!-- Main Architecture Diagram -->
+        <div class="bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 mb-12 overflow-x-auto">
+            <pre class="text-xs sm:text-sm text-gray-400 font-mono whitespace-pre">
+┌──────────────────────────────────────────────────────────────────┐
+│                         <span class="text-red-400 font-bold">RESPOND SYSTEM</span>                           │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────┐  │
+│  │   <span class="text-yellow-400">Sources</span>   │───▶│  <span class="text-green-400">Ingestion</span>  │───▶│   <span class="text-red-400">Qdrant Cloud</span>      │  │
+│  │  • Social   │    │  Pipeline   │    │                     │  │
+│  │  • Sensor   │    │  • Validate │    │  • situation_reports│  │
+│  │  • Call     │    │  • Embed    │    │  • disaster_events  │  │
+│  │  • Report   │    │  • Index    │    │  • resources        │  │
+│  └─────────────┘    └─────────────┘    └──────────┬──────────┘  │
+│                                                    │             │
+│  ┌─────────────┐    ┌─────────────┐    ┌──────────▼──────────┐  │
+│  │   <span class="text-purple-400">Action</span>    │◀───│  <span class="text-cyan-400">Recommend</span>  │◀───│   <span class="text-blue-400">Hybrid Search</span>     │  │
+│  │  Dashboard  │    │   Engine    │    │                     │  │
+│  │             │    │  • Rules    │    │  • Semantic+Filters │  │
+│  │  • Search   │    │  • Priority │    │  • Geo-radius       │  │
+│  │  • Update   │    │  • Evidence │    │  • Decay Reranking  │  │
+│  └─────────────┘    └─────────────┘    └─────────────────────┘  │
+│                                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │  <span class="text-green-400">Memory Layer</span>: Evolution • Reinforcement • Decay             │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
+      </pre>
+        </div>
+
+        <!-- Why Qdrant -->
+        <h2 class="text-2xl font-light mb-8 text-center" style="font-family: Oswald;">Why <span
+                class="text-red-400">Qdrant</span> Is Critical</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 hover:border-red-500/30 transition-all">
+                <iconify-icon icon="solar:filter-linear" width="2rem" class="text-red-400 mb-4"></iconify-icon>
+                <h3 class="text-lg font-medium mb-2">Hybrid Filtering</h3>
+                <p class="text-sm text-gray-400">Semantic + urgency/status/zone filters in a single query.</p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 hover:border-blue-500/30 transition-all">
+                <iconify-icon icon="solar:map-point-linear" width="2rem" class="text-blue-400 mb-4"></iconify-icon>
+                <h3 class="text-lg font-medium mb-2">Geo-Radius Search</h3>
+                <p class="text-sm text-gray-400">Find incidents within N km of any location.</p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6 hover:border-green-500/30 transition-all">
+                <iconify-icon icon="solar:refresh-linear" width="2rem" class="text-green-400 mb-4"></iconify-icon>
+                <h3 class="text-lg font-medium mb-2">In-Place Updates</h3>
+                <p class="text-sm text-gray-400">Update status/confidence without re-embedding vectors.</p>
+            </div>
+        </div>
+
+        <!-- Collections -->
+        <h2 class="text-2xl font-light mb-8 text-center" style="font-family: Oswald;">Qdrant <span
+                class="text-blue-400">Collections</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            <div class="bg-[#0A0A0A] border border-green-500/30 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">ACTIVE</span>
+                    <span class="font-mono text-sm">respond_situation_reports</span>
+                </div>
+                <p class="text-sm text-gray-400">Primary collection for incident storage and retrieval. 384-dim vectors.
+                </p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded text-xs">PHASE 2</span>
+                    <span class="font-mono text-sm">respond_disaster_events</span>
+                </div>
+                <p class="text-sm text-gray-400">Event groupings for coordinated response.</p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded text-xs">PHASE 2</span>
+                    <span class="font-mono text-sm">respond_resource_deployments</span>
+                </div>
+                <p class="text-sm text-gray-400">Track resource allocation and deployment status.</p>
+            </div>
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="px-2 py-1 bg-gray-500/20 text-gray-400 rounded text-xs">PHASE 2</span>
+                    <span class="font-mono text-sm">respond_historical_patterns</span>
+                </div>
+                <p class="text-sm text-gray-400">Historical data for pattern matching and predictions.</p>
+            </div>
+        </div>
+
+        <!-- Payload Schema -->
+        <h2 class="text-2xl font-light mb-8 text-center" style="font-family: Oswald;">Payload <span
+                class="text-purple-400">Schema</span></h2>
+        <div class="bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 overflow-x-auto">
+            <pre class="text-xs sm:text-sm text-gray-400 font-mono">
+{
+  <span class="text-blue-400">"id"</span>: <span class="text-green-400">"uuid"</span>,
+  <span class="text-blue-400">"vector"</span>: [<span class="text-yellow-400">0.023, -0.045, ...</span>],  <span class="text-gray-600">// 384 dimensions</span>
+  <span class="text-blue-400">"payload"</span>: {
+    <span class="text-blue-400">"text"</span>: <span class="text-green-400">"Building collapse near school"</span>,
+    <span class="text-blue-400">"source_type"</span>: <span class="text-green-400">"call"</span>,           <span class="text-gray-600">// social|sensor|call|report</span>
+    <span class="text-blue-400">"timestamp_unix"</span>: <span class="text-yellow-400">1768766885</span>,
+    <span class="text-blue-400">"urgency"</span>: <span class="text-green-400">"critical"</span>,          <span class="text-gray-600">// critical|high|medium|low</span>
+    <span class="text-blue-400">"status"</span>: <span class="text-green-400">"pending"</span>,            <span class="text-gray-600">// pending|acknowledged|resolved</span>
+    <span class="text-blue-400">"zone_id"</span>: <span class="text-green-400">"zone-4"</span>,
+    <span class="text-blue-400">"confidence_score"</span>: <span class="text-yellow-400">0.5</span>,
+    <span class="text-blue-400">"location"</span>: {<span class="text-blue-400">"lat"</span>: <span class="text-yellow-400">28.6139</span>, <span class="text-blue-400">"lon"</span>: <span class="text-yellow-400">77.209</span>},
+    <span class="text-blue-400">"evidence_chain"</span>: []            <span class="text-gray-600">// Audit trail</span>
+  }
+}
+      </pre>
+        </div>
+    </main>
+
+    <footer class="border-t border-white/10 bg-black py-8">
+        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
+            <p class="text-xs text-gray-500">© 2026 RESPOND | Convolve 4.0</p>
+            <a href="index.html" class="text-xs text-gray-400 hover:text-white">← Back to Home</a>
+        </div>
+    </footer>
+</body>
+
+</html>

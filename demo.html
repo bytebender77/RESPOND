@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - RESPOND</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@300;400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="bg-black text-white antialiased">
+    <div class="fixed inset-0 -z-30 pointer-events-none">
+        <div
+            class="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:3rem_3rem]">
+        </div>
+        <div class="absolute -top-[10%] -left-[10%] h-[55%] w-[55%] rounded-full bg-green-900/15 blur-3xl"></div>
+    </div>
+
+    <nav class="fixed top-0 left-0 right-0 z-50 pt-6 px-4">
+        <div
+            class="mx-auto max-w-6xl rounded-full border border-white/10 bg-black/80 backdrop-blur-xl px-6 py-3 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">🚨</div><span
+                    class="text-lg font-semibold" style="font-family:Oswald;">RESPOND</span>
+            </a>
+            <div class="hidden md:flex gap-8">
+                <a href="features.html" class="text-xs text-gray-400 hover:text-white">Features</a>
+                <a href="architecture.html" class="text-xs text-gray-400 hover:text-white">Architecture</a>
+                <a href="demo.html" class="text-xs text-white">Demo</a>
+                <a href="tech.html" class="text-xs text-gray-400 hover:text-white">Tech Stack</a>
+            </div>
+            <a href="frontend/index.html"
+                class="rounded-full bg-white text-black px-5 py-2 text-xs font-semibold">Dashboard →</a>
+        </div>
+    </nav>
+
+    <main class="mx-auto max-w-6xl pt-32 px-6 pb-20">
+        <div class="text-center mb-12">
+            <div class="inline-flex px-3 py-1.5 rounded-full border border-green-500/20 bg-green-500/10 mb-6">
+                <span class="text-xs text-green-400">Try It Now</span>
+            </div>
+            <h1 class="text-5xl font-light mb-4" style="font-family:Oswald;">Live <span
+                    class="text-green-400">Demo</span></h1>
+            <p class="text-gray-400">Test with these curl commands. Backend must be running!</p>
+        </div>
+
+        <div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-6 mb-8">
+            <h2 class="text-lg font-medium mb-4">Quick Start</h2>
+            <div class="grid md:grid-cols-3 gap-4 text-sm font-mono">
+                <div class="bg-black/50 p-4 rounded-xl"><span class="text-green-400">1.</span> uvicorn api.main:app
+                    --reload</div>
+                <div class="bg-black/50 p-4 rounded-xl"><span class="text-green-400">2.</span> curl
+                    http://127.0.0.1:8000/setup</div>
+                <div class="bg-black/50 p-4 rounded-xl"><span class="text-green-400">3.</span> Open
+                    http://127.0.0.1:5500</div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4"><span
+                        class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">POST</span><span
+                        class="font-mono text-sm">/ingest/incident</span></div>
+                <pre class="bg-black/50 p-4 rounded-xl text-xs text-gray-400 font-mono overflow-x-auto">curl -X POST "http://127.0.0.1:8000/ingest/incident" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Fire at Central Mall", "source_type": "social", "urgency": "critical"}'</pre>
+            </div>
+
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4"><span
+                        class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">POST</span><span
+                        class="font-mono text-sm">/search/incidents</span></div>
+                <pre class="bg-black/50 p-4 rounded-xl text-xs text-gray-400 font-mono overflow-x-auto">curl -X POST "http://127.0.0.1:8000/search/incidents" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "fire emergency", "urgency": "critical", "limit": 10}'</pre>
+            </div>
+
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4"><span
+                        class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">POST</span><span
+                        class="font-mono text-sm">/memory/incident/{id}/reinforce</span></div>
+                <pre class="bg-black/50 p-4 rounded-xl text-xs text-gray-400 font-mono overflow-x-auto">curl -X POST "http://127.0.0.1:8000/memory/incident/{ID}/reinforce" \
+  -H "Content-Type: application/json" \
+  -d '{"source_type": "call", "text": "Caller confirms fire at mall"}'</pre>
+            </div>
+
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4"><span
+                        class="px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs">PATCH</span><span
+                        class="font-mono text-sm">/memory/incident/{id}/status</span></div>
+                <pre class="bg-black/50 p-4 rounded-xl text-xs text-gray-400 font-mono overflow-x-auto">curl -X PATCH "http://127.0.0.1:8000/memory/incident/{ID}/status" \
+  -H "Content-Type: application/json" -d '{"status": "acknowledged"}'</pre>
+            </div>
+
+            <div class="bg-[#0A0A0A] border border-white/10 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4"><span
+                        class="px-2 py-1 bg-cyan-500/20 text-cyan-400 rounded text-xs">POST</span><span
+                        class="font-mono text-sm">/recommend/actions</span></div>
+                <pre class="bg-black/50 p-4 rounded-xl text-xs text-gray-400 font-mono overflow-x-auto">curl -X POST "http://127.0.0.1:8000/recommend/actions" \
+  -H "Content-Type: application/json" -d '{"query": "fire emergency", "limit": 5}'</pre>
+            </div>
+        </div>
+
+        <div class="text-center mt-12">
+            <a href="frontend/index.html"
+                class="inline-flex h-12 items-center rounded-full bg-green-600 px-8 text-sm font-medium text-white hover:bg-green-700">Open
+                Dashboard →</a>
+        </div>
+    </main>
+
+    <footer class="border-t border-white/10 py-8">
+        <div class="max-w-6xl mx-auto px-6 flex justify-between">
+            <p class="text-xs text-gray-500">© 2026 RESPOND</p><a href="index.html"
+                class="text-xs text-gray-400 hover:text-white">← Home</a>
+        </div>
+    </footer>
+</body>
+
+</html>
