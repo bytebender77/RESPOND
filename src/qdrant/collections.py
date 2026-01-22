@@ -12,22 +12,35 @@ from config.qdrant_config import (
     DISASTER_EVENTS,
     RESOURCE_DEPLOYMENTS,
     HISTORICAL_PATTERNS,
+    INCIDENT_IMAGES,
 )
 from src.qdrant.client import get_qdrant_client
 from src.utils.logger import get_logger
 
 _logger = get_logger("qdrant.collections")
 
-# All collection names
-ALL_COLLECTIONS = [
+# Text-based collections (384-dim MiniLM embeddings)
+TEXT_COLLECTIONS = [
     SITUATION_REPORTS,
     DISASTER_EVENTS,
     RESOURCE_DEPLOYMENTS,
     HISTORICAL_PATTERNS,
 ]
 
-# Payload fields to index for filtering
-PAYLOAD_INDEX_SCHEMA = {
+# Image-based collections (512-dim CLIP embeddings)
+IMAGE_COLLECTIONS = [
+    INCIDENT_IMAGES,
+]
+
+# All collection names
+ALL_COLLECTIONS = TEXT_COLLECTIONS + IMAGE_COLLECTIONS
+
+# Vector sizes for different collection types
+TEXT_VECTOR_SIZE = 384  # MiniLM-L6-v2
+IMAGE_VECTOR_SIZE = 512  # CLIP ViT-B-32
+
+# Payload fields to index for text collections
+TEXT_PAYLOAD_INDEX_SCHEMA = {
     "timestamp": PayloadSchemaType.KEYWORD,
     "timestamp_unix": PayloadSchemaType.INTEGER,
     "source_type": PayloadSchemaType.KEYWORD,
@@ -36,6 +49,14 @@ PAYLOAD_INDEX_SCHEMA = {
     "zone_id": PayloadSchemaType.KEYWORD,
     "confidence_score": PayloadSchemaType.FLOAT,
     "location": PayloadSchemaType.GEO,
+}
+
+# Payload fields to index for image collections (Phase 12.2)
+IMAGE_PAYLOAD_INDEX_SCHEMA = {
+    "incident_id": PayloadSchemaType.KEYWORD,
+    "image_type": PayloadSchemaType.KEYWORD,
+    "timestamp_unix": PayloadSchemaType.INTEGER,
+    "zone_id": PayloadSchemaType.KEYWORD,
 }
 
 
@@ -53,31 +74,31 @@ def collection_exists(name: str) -> bool:
     return any(c.name == name for c in collections)
 
 
-def create_collection(name: str) -> None:
+def create_collection(name: str, vector_size: int = None) -> None:
     """Create a collection with vector config and payload indexes.
     
     Args:
         name: Collection name to create.
+        vector_size: Vector dimension (defaults based on collection type).
     """
     client = get_qdrant_client()
     
-    # Map distance string to enum
-    distance_map = {
-        "Cosine": Distance.COSINE,
-        "Euclid": Distance.EUCLID,
-        "Dot": Distance.DOT,
-    }
-    distance = distance_map.get(settings.DEFAULT_DISTANCE, Distance.COSINE)
+    # Determine vector size based on collection type
+    if vector_size is None:
+        if name in IMAGE_COLLECTIONS:
+            vector_size = IMAGE_VECTOR_SIZE
+        else:
+            vector_size = TEXT_VECTOR_SIZE
     
     # Create collection with vector config
     client.create_collection(
         collection_name=name,
         vectors_config=VectorParams(
-            size=settings.DEFAULT_VECTOR_SIZE,
-            distance=distance,
+            size=vector_size,
+            distance=Distance.COSINE,
         ),
     )
-    _logger.info(f"Created collection: {name}")
+    _logger.info(f"Created collection: {name} (vector_size={vector_size})")
     
     # Create payload indexes for filtering
     _create_payload_indexes(name)
@@ -91,7 +112,13 @@ def _create_payload_indexes(name: str) -> None:
     """
     client = get_qdrant_client()
     
-    for field_name, field_type in PAYLOAD_INDEX_SCHEMA.items():
+    # Select schema based on collection type
+    if name in IMAGE_COLLECTIONS:
+        schema = IMAGE_PAYLOAD_INDEX_SCHEMA
+    else:
+        schema = TEXT_PAYLOAD_INDEX_SCHEMA
+    
+    for field_name, field_type in schema.items():
         try:
             client.create_payload_index(
                 collection_name=name,
@@ -132,3 +159,4 @@ def ensure_indexes(collection_name: str) -> None:
         collection_name: Collection to add indexes to.
     """
     _create_payload_indexes(collection_name)
+
