@@ -8,7 +8,7 @@
 const API_BASE = window.API_BASE || (
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
-    : 'https://respond-api-bdub.onrender.com'
+    : 'https://respond-api-6qf6.onrender.com'
 );
 let currentResults = [];
 let recentIncidents = []; // Store recent incident IDs for easy access
