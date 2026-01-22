@@ -13,3 +13,10 @@ uvicorn>=0.20.0
 
 # Utilities
 python-dotenv>=1.0.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# AI Models
+sentence-transformers>=2.2.2
+openai-whisper>=20231117
