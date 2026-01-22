@@ -139,7 +139,8 @@ We have specific guides for deploying to the cloud:
 
 ## 🎮 How to Test (Demo Flow)
 
-1. **Ingest Incident**:
+1. **Quick Start**: Check the **[Demo Files Index](demo/DEMO_FILES_INDEX.md)** for comprehensive testing resources.
+2. **Ingest Incident**:
    - Go to **Ingest** tab in the frontend.
    - Text: "Massive fire reported at Central Market, people trapped."
    - Click "Submit".
@@ -181,4 +182,3 @@ respond/
 ## � Documentation Links
 - **[Judge's Guide](JUDGE_GUIDE.md)** - Simplified run instructions.
 - **[Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md)** - Deep dive into architecture.
-- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Cloud deployment steps.
