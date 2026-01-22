@@ -1,128 +1,104 @@
-# 🧪 RESPOND - Ultimate Demo Guide
+# 🧪 RESPOND - Fresh Demo Scenarios (Batch 2)
 
-This guide provides a structured walkthrough for demonstrating the full capabilities of the RESPOND system. It includes a library of **15+ test incidents** and detailed scenarios.
-
----
-
-## ⚡ Quick Start
-
-1.  **Reset Database** (Optional but recommended):
-    ```bash
-    curl -X DELETE http://127.0.0.1:8000/reset
-    curl http://127.0.0.1:8000/setup
-    ```
-2.  **Open Dashboard**: [http://127.0.0.1:5500](http://127.0.0.1:5500)
+**Status:** ✨ NEW (Unused)  
+**Focus:** Complex, multi-stage events for advanced testing.
 
 ---
 
-## 📚 Incident Library (Copy-Paste Ready)
-
-Use these varied incidents to populate your database. Mix and match urgencies and zones.
-
-### 🔥 Fire & Explosion (Critical)
-1.  **Residential Fire**:
-    `Fire reported at 34 Oak Street apartment complex, heavy smoke visible from 3rd floor, residents evacuating.`
-2.  **Industrial Explosion**:
-    `Loud explosion heard at chemical plant in Zone 4, possible gas leak, multiple workers unaccounted for.`
-3.  **Wildfire**:
-    `Brush fire spreading rapidly near highway exit 12, threatening nearby homes due to high winds.`
-
-### 🚑 Medical & Rescue (High)
-4.  **Mass Casualty**:
-    `Metro train derailment at Central Station, multiple injuries reported, passengers trapped in lead car.`
-5.  **Traffic Accident**:
-    `Multi-vehicle collision on Main Bridge, bus overturned, traffic completely blocked.`
-6.  **Structural Collapse**:
-    `Old warehouse roof collapsed during renovation, construction crew trapped inside debris.`
-
-### 🌊 Natural Disasters (High/Critical)
-7.  **Flash Flood**:
-    `River overflowing banks in low-lying residential area, water entering ground floor homes.`
-8.  **Landslide**:
-    `Mudslide blocking mountain pass road, vehicles stranded, power lines down.`
-9.  **Earthquake Damage**:
-    `Significant structural cracks appearing in city hospital foundation after tremors.`
-
-### 🛡️ Public Safety (Medium)
-10. **Suspicious Package**:
-    `Unattended black bag left near stadium entrance, canine unit requested for inspection.`
-11. **Crowd Control**:
-    `Large protest gathering at City Hall turning aggressive, barriers breached.`
-12. **Chemical Spill**:
-    `Tanker truck leaking unidentified liquid on interstate, strong chemical odor reported.`
-
-### 🔧 Infrastructure (Low/Medium)
-13. **Power Outage**:
-    `Grid failure affecting 3 neighborhood blocks, traffic lights out at major intersections.`
-14. **Water Main Break**:
-    `Main pipe burst flooding downtown street, road surface buckling.`
-15. **Telecom Failure**:
-    `Cellular tower down in Zone 2, emergency calls failing to connect.`
+## ⚡ Quick Reset
+Before starting, clear your database to avoid confusion with old data.
+```bash
+curl -X DELETE http://127.0.0.1:8000/reset
+curl http://127.0.0.1:8000/setup
+```
 
 ---
 
-## 🎬 Master Scenario: "The Bridge Collapse"
+## 📚 Incident Library (Fresh Batch)
 
-Follow this script to demonstrate **every key feature** in 5 minutes.
+### ☣️ Scenario A: "The Subway Bio-Hazard" (Medical/Panic)
+*Good for testing: Sensor data, Crowd panic, Urgent response.*
 
-### Phase 1: Ingestion & Deduplication
-1.  **Ingest Incident A**:
-    *   **Text**: "Bridge reported collapsing near reaction park" (Note: "reaction" is a typo for "recreation")
-    *   **Source**: Call
-    *   **Urgency**: Critical
-    *   **Status**: Pending
-    *   *Result*: **✓ NEW** (Copy this Incident ID)
-2.  **Ingest Incident B (Duplicate)**:
-    *   **Text**: "Big bridge collapse near recreation park, cars in water"
-    *   **Source**: Social
-    *   *Result*: **🔄 DEDUPLICATED** (Same ID as A, Evidence Check increases)
+1.  **Gas Leak**:
+    `Strange almond-like smell reported at Metro Central Station platform, passengers coughing.`
+2.  **Sensor Alert**:
+    `Chemical sensor HX-99 detected dangerous levels of Sarin gas particles in Zone-4 subway tunnel.`
+3.  **Panic/Stampede**:
+    `Stampede reported at Metro exit gates, multiple people crushed, crowd moving towards downtown.`
+4.  **Medical Emergency**:
+    `Three people unconscious near ticket counter, foaming at mouth, requesting immediate HAZMAT.`
 
-### Phase 2: Multi-Modal Evidence
-1.  Click **🖼️ Use for Media** on the success card.
-2.  **Upload Image**:
-    *   Select a photo of a bridge/structure collapse.
-    *   Click **Upload**.
-3.  **Upload Audio**:
-    *   Select audio file (e.g., call recording).
-    *   Click **Transcribe & Reinforce**.
-    *   *Result*: **Confusion Check** (Similarity score shown, Transcript displayed).
+### � Scenario B: "The Smart City Blackout" (Cyber/Infrastructure)
+*Good for testing: Cascading failures, Deduplication.*
 
-### Phase 3: Search & Context
+5.  **Substation Explosion**:
+    `Loud bang heard at North Grid Substation, black smoke rising, entire neighborhood lost power.`
+6.  **Traffic Chaos**:
+    `All traffic lights out at Main & 4th intersection, 5-car pileup reported.`
+7.  **Looting**:
+    `Store windows smashed at Electronics Store during blackout, looting in progress.`
+8.  **Hospital Power Failure**:
+    `City Hospital backup generator failed to start, ICU on battery power, requesting emergency generators.`
+
+### 🌀 Scenario C: "The Typhoon Surge" (Natural Disaster)
+*Good for testing: Image search ("flood", "water"), Wide-area response.*
+
+9.  **Levee Breach**:
+    `Sea wall breached at Harbor Point, ocean water entering financial district streets.`
+10. **Stranded Vehicles**:
+    `School bus trapped in rising floodwaters at underpass near Zone-2, children detailed inside.`
+11. **Roof Collapse**:
+    `High winds tore roof off Sports Arena, debris falling onto highway.`
+12. **Floating Debris**:
+    `Large shipping containers floating down Main Street, impacting buildings.`
+
+---
+
+## 🎬 Master Script: "Operation Bio-Shield"
+
+**Theme:** Coordinating a response to a chemical attack in the subway.
+
+### Phase 1: Detection (The "Sensor" vs "Human")
+1.  **Ingest Human Report**:
+    *   *Text:* `People passing out on the subway platform, weird smell.`
+    *   *Source:* Social
+    *   *Result:* **✓ NEW**
+2.  **Ingest Sensor Report (Deduplication Test)**:
+    *   *Text:* `Environmental sensor detected toxic gas irregularity at subway platform.`
+    *   *Source:* Sensor
+    *   *Result:* **🔄 DEDUPLICATED** (or NEW depending on threshold). *Key learning: Even if it doesn't dedup, it's fine. If it does, great.*
+
+### Phase 2: Verification (The Audio Evidence)
+1.  Go to **Media Tab** (Select the human report).
+2.  **Upload Audio** (Prevert recording of a siren or coughing):
+    *   *Action:* Transcribe & Reinforce.
+    *   *Story:* "We received a voice note from a passenger."
+    *   *Expectation:* **✅ Reinforcement Accepted** (Use audio containing words like "cant breathe", "gas", "help").
+
+### Phase 3: Investigation (Context Search)
 1.  Go to **Incidents Tab**.
-2.  Search Query: `bridge infrastructure failure`
-3.  **Verify**:
-    *   Incident shows **✓ Multi-source Confirmed** (because of Text + Image + Audio).
-    *   Confidence Score should be high (>85%).
-4.  Expand **📋 Evidence Chain** to show all 3 pieces of data linked together.
+2.  Search: `chemical attack victims`
+3.  **Verify**: The "People passing out" incident appears top of list.
 
-### Phase 4: AI Recommendations
-1.  With the search results visible, click **🎯 Recommend Actions**.
-2.  **Verify**:
-    *   AI suggests `DISPATCH_HEAVY_RESCUE` or `CLOSE_ROADS`.
-    *   Priority is **5/5**.
-
-### Phase 5: Response (Deployment)
-1.  Click **🚒 Use for Deployment**.
+### Phase 4: Response (The HAZMAT Team)
+1.  Click **Recommend Actions**
+    *   Look for `DISPATCH_HAZMAT` or `EVACUATE` suggestions.
 2.  **Create Deployment**:
-    *   **Action**: Dispatch Rescue Team
-    *   **Unit**: Heavy Rescue 1
-    *   **Status**: En Route
-3.  **Update Deployment**:
-    *   Change status to `On Site`.
-    *   Add Note: "Team arrived, beginning extraction."
+    *   *Action:* Dispatch HAZMAT Unit 1
+    *   *Apparatus:* Bio-Defense Truck
+    *   *Zone:* Zone-4
+3.  **Update Status**:
+    *   Set to: `En Route` -> `On Site`
+
+### Phase 5: Resolution
+1.  Update Incident Status to **Resolved**.
+2.  Update Deployment to **Completed**.
 
 ---
 
-## 🔍 Testing "Contextual Image Search"
+## 📸 Image Search Test Set
+*Use these prompts if you upload relevant images:*
 
-This tests the new feature where images show specific text descriptions.
-
-1.  **Upload Images** for two *different* incidents:
-    *   Incident 1 (Fire): Upload fire image. description: "Fire at building"
-    *   Incident 2 (Flood): Upload flood image. description: "Flood in street"
-2.  Go to **Media Tab** -> **Search Images**.
-3.  Query: `disaster`
-4.  **Result**:
-    *   You see both images.
-    *   **Crucially**: Under the fire image, it says "Fire at building...". Under the flood image, it says "Flood in street...".
-    *   **Success**: You can identify which is which without clicking!
+*   **For Blackout:** Search `dark street` or `traffic jam`.
+*   **For Bio-Hazard:** Search `crowd panic` or `subway`.
+*   **For Typhoon:** Search `flood water` or `floating debris`.
