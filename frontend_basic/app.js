@@ -128,6 +128,20 @@ async function uploadAudio(incidentId, file, sourceType) {
   return response.json();
 }
 
+// Image Search (Text to Image via CLIP)
+async function searchImages(query, imageType = null, limit = 10) {
+  const params = { query, limit };
+  if (imageType) params.image_type = imageType;
+
+  const response = await fetch(`${API_BASE}/search/images`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!response.ok) throw new Error((await response.json()).detail || 'Image search failed');
+  return response.json();
+}
+
 // Phase 15: Deployments
 async function createDeployment(data) {
   const response = await fetch(`${API_BASE}/deployments/create`, {
@@ -615,9 +629,58 @@ document.getElementById('updateDeploymentForm').addEventListener('submit', async
 });
 
 // =====================
+// Event Listeners - Image Search
+// =====================
+
+document.getElementById('imageSearchForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultEl = document.getElementById('imageSearchResult');
+  const galleryEl = document.getElementById('imageGallery');
+  const gridEl = document.getElementById('imageGalleryGrid');
+
+  hideResult(resultEl);
+  galleryEl.classList.add('hidden');
+
+  const query = document.getElementById('image_search_query').value;
+  const imageType = document.getElementById('image_search_type').value;
+
+  try {
+    showResult(resultEl, '⏳ Searching images with CLIP...');
+    const result = await searchImages(query, imageType || null);
+
+    if (result.count === 0) {
+      showResult(resultEl, `🔍 No images found for "${query}"`);
+      return;
+    }
+
+    showResult(resultEl, `✓ Found ${result.count} image(s) for "${query}"`);
+
+    // Render gallery
+    gridEl.innerHTML = result.results.map(img => `
+      <div class="gallery-item" onclick="window.open('/${img.image_path}', '_blank')">
+        <img src="/${img.image_path}" alt="${img.image_type}" loading="lazy">
+        <div class="gallery-item-info">
+          <span class="badge badge-${img.image_type}">${img.image_type}</span>
+          <span class="gallery-score">${(img.score * 100).toFixed(0)}%</span>
+        </div>
+        <div class="gallery-item-meta">
+          <small>Incident: ${img.incident_id.substring(0, 8)}...</small>
+        </div>
+      </div>
+    `).join('');
+
+    galleryEl.classList.remove('hidden');
+
+  } catch (error) {
+    showResult(resultEl, `✗ ${error.message}`, true);
+  }
+});
+
+// =====================
 // Initialize
 // =====================
 
 console.log('🚨 RESPOND Dashboard initialized');
 console.log('📡 API Base:', API_BASE);
-console.log('✅ Features: Dedup, Images (CLIP), Audio (Whisper), Deployments');
+console.log('✅ Features: Dedup, Images (CLIP), Audio (Whisper), Deployments, Image Search');
+

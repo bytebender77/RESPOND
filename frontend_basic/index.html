@@ -239,6 +239,39 @@
         <div id="audioUploadResult" class="result-box"></div>
         <div id="transcriptPreview" class="transcript-preview hidden"></div>
       </section>
+
+      <!-- Image Search Section -->
+      <section class="panel full-width">
+        <h2>🔍 Search Images (Text → Image)</h2>
+        <p class="panel-subtitle">Use CLIP to find images by describing what you're looking for</p>
+        <form id="imageSearchForm" class="form">
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label for="image_search_query">Search Query</label>
+              <input type="text" id="image_search_query"
+                placeholder="e.g., fire with heavy smoke, flooded street, collapsed building..." required>
+            </div>
+            <div class="form-group">
+              <label for="image_search_type">Image Type</label>
+              <select id="image_search_type">
+                <option value="">All Types</option>
+                <option value="photo">Photo</option>
+                <option value="satellite">Satellite</option>
+                <option value="drone">Drone</option>
+                <option value="cctv">CCTV</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">🔍 Search Images</button>
+        </form>
+        <div id="imageSearchResult" class="result-box"></div>
+
+        <!-- Image Gallery -->
+        <div id="imageGallery" class="image-gallery hidden">
+          <h3>📷 Found Images</h3>
+          <div id="imageGalleryGrid" class="gallery-grid"></div>
+        </div>
+      </section>
     </div>
 
     <!-- TAB 3: Deployments -->

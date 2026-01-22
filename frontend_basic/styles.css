@@ -794,3 +794,105 @@ input[type="file"]:hover {
 .btn-info:hover {
   background: rgba(59, 130, 246, 0.25);
 }
+
+/* ============ FULL WIDTH PANEL ============ */
+.panel.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ============ IMAGE GALLERY ============ */
+.image-gallery {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.image-gallery.hidden {
+  display: none;
+}
+
+.image-gallery h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.gallery-item {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border);
+}
+
+.gallery-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.gallery-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.gallery-item-meta {
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Badge for image types */
+.badge-photo {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #22c55e;
+}
+
+.badge-satellite {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #8b5cf6;
+}
+
+.badge-drone {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #3b82f6;
+}
+
+.badge-cctv {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #f59e0b;
+}
+
+.badge-screenshot {
+  background: rgba(107, 114, 128, 0.15);
+  border: 1px solid rgba(107, 114, 128, 0.35);
+  color: #6b7280;
+}
