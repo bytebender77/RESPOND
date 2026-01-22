@@ -4,12 +4,15 @@
  */
 
 // Configure API_BASE: set window.API_BASE before loading this script for production
+// Configure API_BASE: set window.API_BASE before loading this script for production
 const API_BASE = window.API_BASE || (
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://127.0.0.1:8000'
     : 'https://respond-api-bdub.onrender.com'
 );
 let currentResults = [];
+let recentIncidents = []; // Store recent incident IDs for easy access
+let lastIncidentId = null; // Most recent incident ID
 
 // DOM Elements
 const ingestForm = document.getElementById('ingestForm');
@@ -33,13 +36,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     // Remove active from all buttons
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    
+
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(tab => {
       tab.style.display = 'none';
       tab.classList.remove('active');
     });
-    
+
     // Show selected tab
     const tabId = btn.getAttribute('data-tab') + '-tab';
     const tabContent = document.getElementById(tabId);
@@ -102,7 +105,7 @@ async function uploadImage(incidentId, file, imageType, zoneId) {
   formData.append('file', file);
   formData.append('image_type', imageType);
   if (zoneId) formData.append('zone_id', zoneId);
-  
+
   const response = await fetch(`${API_BASE}/ingest/incident/${incidentId}/image`, {
     method: 'POST',
     body: formData,
@@ -116,7 +119,7 @@ async function uploadAudio(incidentId, file, sourceType) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('source_type', sourceType);
-  
+
   const response = await fetch(`${API_BASE}/memory/incident/${incidentId}/reinforce_audio`, {
     method: 'POST',
     body: formData,
@@ -353,6 +356,34 @@ window.copyIncidentId = function (id) {
   alert(`✓ Copied: ${id}`);
 };
 
+// Copy to clipboard helper
+window.copyToClipboard = function (text) {
+  navigator.clipboard.writeText(text);
+  alert(`✓ Copied to clipboard!`);
+};
+
+// Auto-fill incident ID in Media tab and switch to it
+window.useForMedia = function (incidentId) {
+  // Fill both image and audio fields
+  document.getElementById('image_incident_id').value = incidentId;
+  document.getElementById('audio_incident_id').value = incidentId;
+
+  // Switch to Media tab
+  document.querySelectorAll('.tab-btn')[1].click();
+
+  alert(`✓ Incident ID filled in Media tab. Select your file and upload!`);
+};
+
+// Auto-fill incident ID in Deployments tab and switch to it
+window.useForDeployment = function (incidentId) {
+  document.getElementById('deploy_incident_ids').value = incidentId;
+
+  // Switch to Deployments tab
+  document.querySelectorAll('.tab-btn')[2].click();
+
+  alert(`✓ Incident ID added to Deployments. Fill in unit details and create!`);
+};
+
 // =====================
 // Event Listeners - Incidents
 // =====================
@@ -375,17 +406,25 @@ ingestForm.addEventListener('submit', async (e) => {
 
   try {
     const result = await ingestIncident(data);
-    
+
+    // Store the incident ID for easy access
+    lastIncidentId = result.incident_id;
+    recentIncidents.unshift({ id: result.incident_id, text: data.text.substring(0, 30) });
+    if (recentIncidents.length > 10) recentIncidents.pop(); // Keep last 10
+
     // Phase 11: Show deduplication status
     const isDeduplicated = result.message.includes('deduplicated');
     const icon = isDeduplicated ? '🔄' : '✓';
     const statusText = isDeduplicated ? 'DEDUPLICATED' : 'NEW';
-    
+
     showResult(ingestResult, `
-      ${icon} <strong>${statusText}</strong>: ${result.incident_id.substring(0, 12)}...<br>
-      <small>${result.message}</small>
+      ${icon} <strong>${statusText}</strong>: <code>${result.incident_id}</code><br>
+      <small>${result.message}</small><br><br>
+      <button class="btn btn-small btn-info" onclick="copyToClipboard('${result.incident_id}')">📋 Copy ID</button>
+      <button class="btn btn-small btn-success" onclick="useForMedia('${result.incident_id}')">🖼️ Use for Media</button>
+      <button class="btn btn-small btn-secondary" onclick="useForDeployment('${result.incident_id}')">🚒 Use for Deployment</button>
     `);
-    
+
     lastIngestTime.textContent = `Last ingest: just now`;
     document.getElementById('text').value = '';
   } catch (error) {
@@ -453,17 +492,17 @@ document.getElementById('imageUploadForm').addEventListener('submit', async (e) 
   e.preventDefault();
   const resultEl = document.getElementById('imageUploadResult');
   hideResult(resultEl);
-  
+
   const incidentId = document.getElementById('image_incident_id').value;
   const file = document.getElementById('image_file').files[0];
   const imageType = document.getElementById('image_type').value;
   const zoneId = document.getElementById('image_zone_id').value;
-  
+
   if (!file) {
     showResult(resultEl, '✗ Please select an image file', true);
     return;
   }
-  
+
   try {
     showResult(resultEl, '⏳ Uploading and embedding image...');
     const result = await uploadImage(incidentId, file, imageType, zoneId);
@@ -487,26 +526,26 @@ document.getElementById('audioUploadForm').addEventListener('submit', async (e) 
   const transcriptEl = document.getElementById('transcriptPreview');
   hideResult(resultEl);
   transcriptEl.classList.add('hidden');
-  
+
   const incidentId = document.getElementById('audio_incident_id').value;
   const file = document.getElementById('audio_file').files[0];
   const sourceType = document.getElementById('audio_source_type').value;
-  
+
   if (!file) {
     showResult(resultEl, '✗ Please select an audio file', true);
     return;
   }
-  
+
   try {
     showResult(resultEl, '⏳ Transcribing audio with Whisper...');
     const result = await uploadAudio(incidentId, file, sourceType);
-    
+
     const acceptedIcon = result.accepted ? '✅' : '❌';
     showResult(resultEl, `
       ${acceptedIcon} <strong>${result.accepted ? 'Reinforcement Accepted' : 'Reinforcement Rejected'}</strong><br>
       <small>Similarity: ${(result.similarity * 100).toFixed(1)}% | Confidence: ${result.old_confidence?.toFixed(2)} → ${result.new_confidence?.toFixed(2)}</small>
     `);
-    
+
     // Show transcript
     if (result.transcript) {
       transcriptEl.innerHTML = `
@@ -515,7 +554,7 @@ document.getElementById('audioUploadForm').addEventListener('submit', async (e) 
       `;
       transcriptEl.classList.remove('hidden');
     }
-    
+
     document.getElementById('audioUploadForm').reset();
   } catch (error) {
     showResult(resultEl, `✗ ${error.message}`, true);
@@ -530,10 +569,10 @@ document.getElementById('deploymentForm').addEventListener('submit', async (e) =
   e.preventDefault();
   const resultEl = document.getElementById('deploymentResult');
   hideResult(resultEl);
-  
+
   const incidentIdsRaw = document.getElementById('deploy_incident_ids').value;
   const incidentIds = incidentIdsRaw.split(',').map(id => id.trim()).filter(id => id);
-  
+
   const data = {
     action_type: document.getElementById('deploy_action_type').value,
     incident_ids: incidentIds,
@@ -541,7 +580,7 @@ document.getElementById('deploymentForm').addEventListener('submit', async (e) =
     zone_id: document.getElementById('deploy_zone_id').value || null,
     notes: document.getElementById('deploy_notes').value || null,
   };
-  
+
   try {
     const result = await createDeployment(data);
     showResult(resultEl, `
@@ -558,11 +597,11 @@ document.getElementById('updateDeploymentForm').addEventListener('submit', async
   e.preventDefault();
   const resultEl = document.getElementById('updateDeploymentResult');
   hideResult(resultEl);
-  
+
   const deploymentId = document.getElementById('update_deployment_id').value;
   const status = document.getElementById('update_status').value;
   const notes = document.getElementById('update_notes').value;
-  
+
   try {
     const result = await updateDeploymentStatus(deploymentId, status, notes);
     showResult(resultEl, `

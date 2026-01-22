@@ -288,6 +288,23 @@ body {
   color: #ef4444;
 }
 
+.result-box code {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 11px;
+  word-break: break-all;
+  color: var(--text);
+  margin: 4px 0;
+}
+
+.result-box .btn {
+  margin-top: 4px;
+  margin-right: 6px;
+}
+
 /* ============ RESULTS SECTION ============ */
 .results-header {
   display: flex;
