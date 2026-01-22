@@ -29,6 +29,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount uploads directory for static files (images, audio)
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Create uploads directory if it doesn't exist
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 # Include routers
 app.include_router(setup_router)
 app.include_router(ingest_router)

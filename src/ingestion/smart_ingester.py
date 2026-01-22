@@ -14,7 +14,7 @@ from src.utils.logger import get_logger
 _logger = get_logger("ingestion.smart")
 
 # Similarity threshold for deduplication
-DEDUP_SIMILARITY_THRESHOLD = 0.80
+DEDUP_SIMILARITY_THRESHOLD = 0.70
 
 # Time window for deduplication (in hours)
 DEDUP_TIME_WINDOW_HOURS = 2

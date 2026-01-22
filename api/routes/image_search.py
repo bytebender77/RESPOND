@@ -32,6 +32,7 @@ class ImageSearchResult(BaseModel):
     score: float
     zone_id: str | None = None
     created_at: str | None = None
+    incident_text: str | None = None
 
 
 class ImageSearchResponse(BaseModel):
@@ -83,25 +84,54 @@ async def search_images(request: ImageSearchRequest):
             qdrant_filter = Filter(must=filter_conditions)
         
         # Search
-        results = client.search(
+        results_obj = client.query_points(
             collection_name=INCIDENT_IMAGES,
-            query_vector=query_vector,
+            query=query_vector,
             limit=request.limit,
             query_filter=qdrant_filter,
             with_payload=True,
         )
+        results = results_obj.points
+        # Extract incident IDs to fetch context
+        incident_ids = list(set(r.payload.get("incident_id") for r in results_obj.points if r.payload.get("incident_id")))
         
+        # Fetch incident details
+        incident_map = {}
+        if incident_ids:
+            try:
+                from config.qdrant_config import SITUATION_REPORTS
+                incidents = client.retrieve(
+                    collection_name=SITUATION_REPORTS,
+                    ids=incident_ids,
+                    with_payload=["text"],
+                )
+                for inc in incidents:
+                    incident_map[str(inc.id)] = inc.payload.get("text", "")
+            except Exception as e:
+                _logger.warning(f"Could not fetch incident details: {e}")
+
         # Format results
         formatted = []
-        for r in results:
+        for r in results_obj.points:
+            # Fix image path for frontend serving
+            raw_path = r.payload.get("image_path", "")
+            if "uploads/" in raw_path:
+                # Convert absolute path to relative path
+                image_path = "uploads/" + raw_path.split("uploads/")[1]
+            else:
+                image_path = raw_path
+            
+            inc_id = r.payload.get("incident_id", "")
+            
             formatted.append(ImageSearchResult(
                 image_id=str(r.id),
-                incident_id=r.payload.get("incident_id", ""),
-                image_path=r.payload.get("image_path", ""),
+                incident_id=inc_id,
+                image_path=image_path,
                 image_type=r.payload.get("image_type", "photo"),
                 score=r.score,
                 zone_id=r.payload.get("zone_id"),
                 created_at=r.payload.get("created_at"),
+                incident_text=incident_map.get(inc_id),
             ))
         
         _logger.info(f"Image search '{request.query}' returned {len(formatted)} results")

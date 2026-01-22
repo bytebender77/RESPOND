@@ -53,7 +53,7 @@ def reinforce_incident(
     reinforced_count = incident_payload.get("reinforced_count", 0)
     
     # Determine if evidence is accepted
-    accepted = similarity >= 0.65
+    accepted = similarity >= 0.50
     
     # Compute new confidence
     if accepted:

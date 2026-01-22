@@ -5,8 +5,12 @@
 
 // Configure API_BASE: set window.API_BASE before loading this script for production
 // Configure API_BASE: set window.API_BASE before loading this script for production
+// Configure API_BASE: set window.API_BASE before loading this script for production
 const API_BASE = window.API_BASE || (
-  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '[::]' ||
+    window.location.hostname === '0.0.0.0'
     ? 'http://127.0.0.1:8000'
     : 'https://respond-api-6qf6.onrender.com'
 );
@@ -366,15 +370,52 @@ window.quickAcknowledge = async function (id) {
 };
 
 window.copyIncidentId = function (id) {
-  navigator.clipboard.writeText(id);
-  alert(`✓ Copied: ${id}`);
+  window.copyToClipboard(id);
 };
 
 // Copy to clipboard helper
+// Copy to clipboard helper with fallback
 window.copyToClipboard = function (text) {
-  navigator.clipboard.writeText(text);
-  alert(`✓ Copied to clipboard!`);
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert(`✓ Copied to clipboard!`);
+    }).catch(err => {
+      console.error('Async: Could not copy text: ', err);
+      fallbackCopyTextToClipboard(text);
+    });
+  } else {
+    fallbackCopyTextToClipboard(text);
+  }
 };
+
+function fallbackCopyTextToClipboard(text) {
+  var textArea = document.createElement("textarea");
+  textArea.value = text;
+
+  // Ensure it's not visible but part of DOM
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.position = "fixed";
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    var successful = document.execCommand('copy');
+    var msg = successful ? 'successful' : 'unsuccessful';
+    if (successful) {
+      alert(`✓ Copied to clipboard!`);
+    } else {
+      alert(`✗ Copy failed`);
+    }
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+    alert(`✗ Copy failed: ${err}`);
+  }
+
+  document.body.removeChild(textArea);
+}
 
 // Auto-fill incident ID in Media tab and switch to it
 window.useForMedia = function (incidentId) {
@@ -657,14 +698,14 @@ document.getElementById('imageSearchForm').addEventListener('submit', async (e) 
 
     // Render gallery
     gridEl.innerHTML = result.results.map(img => `
-      <div class="gallery-item" onclick="window.open('/${img.image_path}', '_blank')">
-        <img src="/${img.image_path}" alt="${img.image_type}" loading="lazy">
+      <div class="gallery-item" onclick="window.open('${API_BASE}/${img.image_path}', '_blank')">
+        <img src="${API_BASE}/${img.image_path}" alt="${img.image_type}" loading="lazy">
         <div class="gallery-item-info">
           <span class="badge badge-${img.image_type}">${img.image_type}</span>
           <span class="gallery-score">${(img.score * 100).toFixed(0)}%</span>
         </div>
         <div class="gallery-item-meta">
-          <small>Incident: ${img.incident_id.substring(0, 8)}...</small>
+          <small title="ID: ${img.incident_id}">${img.incident_text ? img.incident_text.substring(0, 40) + '...' : 'Incident: ' + img.incident_id.substring(0, 8) + '...'}</small>
         </div>
       </div>
     `).join('');
