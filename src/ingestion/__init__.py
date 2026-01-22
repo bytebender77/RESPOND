@@ -2,5 +2,7 @@
 
 from src.ingestion.base_ingester import BaseIngester
 from src.ingestion.incident_ingester import IncidentIngester
+from src.ingestion.smart_ingester import SmartIncidentIngester
 
-__all__ = ["BaseIngester", "IncidentIngester"]
+__all__ = ["BaseIngester", "IncidentIngester", "SmartIncidentIngester"]
+
