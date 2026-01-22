@@ -23,16 +23,18 @@ RESPOND transforms chaotic disaster reports into prioritized, actionable intelli
 | 📊 **Confidence Reinforcement** | Multi-source verification boosts confidence |
 | ⏱️ **Time Decay** | Fresh incidents automatically prioritized |
 | 🎯 **Action Recommendations** | Evidence-grounded operational decisions |
+| 🖼️ **Image & Audio** | Multimodal support (CLIP & Whisper) |
 
 ---
 
-## 🛠️ Prerequisites
+## � Deliverables & Reproducibility
 
-Before you begin, ensure you have:
+This project is designed to be **fully reproducible** and **end-to-end runnable**.
 
+### 🛠️ Prerequisites
 - **Python 3.10+** installed
-- **Qdrant Cloud account** (free tier works) — [Sign up here](https://cloud.qdrant.io/)
-- **Git** for cloning the repository
+- **Qdrant** (Vector Database) - Running via Docker (Local) OR Cloud (Free Tier)
+- **Git**
 
 ---
 
@@ -41,8 +43,8 @@ Before you begin, ensure you have:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/respond.git
-cd respond
+git clone https://github.com/bytebender77/RESPOND.git
+cd RESPOND
 ```
 
 ### Step 2: Create Virtual Environment
@@ -60,45 +62,37 @@ source venv/bin/activate
 # venv\Scripts\activate
 ```
 
-You should see `(venv)` in your terminal prompt.
-
 ### Step 3: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-This installs:
-- `fastapi` + `uvicorn` — API server
-- `qdrant-client` — Vector database client
-- `sentence-transformers` — Text embeddings
-- `pydantic` — Data validation
-- Other supporting libraries
+This installs `fastapi`, `uvicorn`, `qdrant-client`, `sentence-transformers` (Text), `whisper` (Audio), and `CLIP` (Images).
 
 ### Step 4: Configure Environment Variables
 
-Copy the example environment file:
+Create a `.env` file in the root directory.
 
+**Option A: Local Qdrant (Docker)**
+If you have Docker installed, this is the easiest way.
 ```bash
-cp .env.example .env
+docker run -p 6333:6333 qdrant/qdrant
 ```
-
-Now edit `.env` with your Qdrant credentials:
-
+Then your `.env` file can be:
 ```env
-# Get these from https://cloud.qdrant.io/
-QDRANT_URL=https://your-cluster.cloud.qdrant.io:6333
-QDRANT_API_KEY=your-api-key-here
-
-# Other settings (defaults work fine)
-QDRANT_PREFIX=respond_
+QDRANT_URL=http://localhost:6333
 LOG_LEVEL=INFO
 ```
 
-**How to get Qdrant credentials:**
-1. Go to [cloud.qdrant.io](https://cloud.qdrant.io/)
-2. Create a free cluster
-3. Copy the **URL** and **API Key** from the dashboard
+**Option B: Qdrant Cloud (Free Tier)**
+1. Sign up at [cloud.qdrant.io](https://cloud.qdrant.io/).
+2. Create a free cluster -> Get **URL** and **API Key**.
+3. Update `.env`:
+```env
+QDRANT_URL=https://your-cluster-url.qdrant.io
+QDRANT_API_KEY=your-api-key-here
+```
 
 ---
 
@@ -107,140 +101,60 @@ LOG_LEVEL=INFO
 ### Step 1: Start the Backend API
 
 ```bash
-uvicorn api.main:app --reload
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
-
-You should see:
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000
-INFO:     Started reloader process
-```
-
-The API is now running at **http://127.0.0.1:8000**
+It will run at **http://localhost:8000**.
+Visit **http://localhost:8000/docs** to explore the interactive API documentation.
 
 ### Step 2: Initialize Qdrant Collections
 
-Open a **new terminal** (keep the API running) and run:
-
+Open a **new terminal** (keep API running) and run:
 ```bash
-curl http://127.0.0.1:8000/setup
+curl http://localhost:8000/setup
 ```
-
-Expected response:
-```json
-{"status":"ok","collections":{"created":["respond_situation_reports",...]}}
-```
-
-This creates the vector database collections needed for RESPOND.
+*Expected output: `{"status":"ok","collections":{...}}`*
 
 ### Step 3: Start the Frontend Dashboard
 
-In another terminal:
+You can simply open `frontend_basic/index.html` in your browser, or for a better experience:
 
 ```bash
-cd frontend
-python3 -m http.server 5500
+cd frontend_basic
+python3 -m http.server 3000
+# or if you have 'serve' installed: npx serve
 ```
-
-Now open your browser: **http://127.0.0.1:5500**
+Visit **http://localhost:3000**.
 
 ---
 
-## 🎮 Using RESPOND
+## ☁️ Deployment
 
-### Option A: Use the Dashboard UI
+We have specific guides for deploying to the cloud:
+- **Backend**: Render (using `render.yaml`)
+- **Frontend**: Vercel
 
-1. Open **http://127.0.0.1:5500**
-2. **Ingest Incident**: Fill the left form and click "Submit Incident"
-3. **Search**: Enter a query like "fire emergency" and click "Search"
-4. **Update Status**: Use dropdown on each card
-5. **Recommend Actions**: Click "Recommend Actions" button
-
-### Option B: Use the API Directly
-
-**Ingest an incident:**
-```bash
-curl -X POST "http://127.0.0.1:8000/ingest/incident" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "Building collapse near metro station, people trapped",
-    "source_type": "call",
-    "urgency": "critical",
-    "zone_id": "zone-4",
-    "location": {"lat": 28.6139, "lon": 77.2090}
-  }'
-```
-
-**Search incidents:**
-```bash
-curl -X POST "http://127.0.0.1:8000/search/incidents" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "query": "collapse trapped rescue",
-    "limit": 10,
-    "last_hours": 24
-  }'
-```
-
-**Update status:**
-```bash
-curl -X PATCH "http://127.0.0.1:8000/memory/incident/<INCIDENT_ID>/status" \
-  -H "Content-Type: application/json" \
-  -d '{"status": "acknowledged"}'
-```
-
-**Reinforce with evidence:**
-```bash
-curl -X POST "http://127.0.0.1:8000/memory/incident/<INCIDENT_ID>/reinforce" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "source_type": "sensor",
-    "text": "Seismic sensors confirm building collapse in zone-4"
-  }'
-```
-
-**Get recommendations:**
-```bash
-curl -X POST "http://127.0.0.1:8000/recommend/actions" \
-  -H "Content-Type: application/json" \
-  -d '{"query": "emergency rescue", "limit": 5}'
-```
+👉 **[Read the Deployment Guide](DEPLOYMENT_GUIDE.md)** for detailed cloud instructions.
 
 ---
 
-## 🎬 Running the Disaster Simulator
+## 🎮 How to Test (Demo Flow)
 
-To simulate live disaster events for demo purposes:
-
-```bash
-python3 scripts/simulate_disaster.py
-```
-
-This generates realistic incidents every 3 seconds:
-```
-[16:22:44] #1 | fire       | critical | zone-3 | ID: bca57afe...
-[16:22:47] #2 | flood      | high     | zone-1 | ID: fd6e4f16...
-[16:22:50] #3 | collapse   | critical | zone-4 | ID: ac9818d4...
-```
-
-Press `Ctrl+C` to stop.
-
----
-
-## 📡 API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/health` | Health check |
-| `GET` | `/setup` | Initialize collections |
-| `POST` | `/ingest/incident` | Ingest new incident |
-| `POST` | `/search/incidents` | Hybrid semantic search |
-| `PATCH` | `/memory/incident/{id}/status` | Update status |
-| `POST` | `/memory/incident/{id}/reinforce` | Add corroborating evidence |
-| `POST` | `/recommend/actions` | Get action recommendations |
-| `DELETE` | `/reset` | Clear all data |
-
-**Interactive API Docs:** http://127.0.0.1:8000/docs
+1. **Ingest Incident**:
+   - Go to **Ingest** tab in the frontend.
+   - Text: "Massive fire reported at Central Market, people trapped."
+   - Click "Submit".
+2. **Search**:
+   - Go to **Search** tab.
+   - Query: "fire near market".
+   - You will see your incident.
+3. **Reinforce (Audio)**:
+   - Go to **Media** tab.
+   - Use the Incident ID from step 1.
+   - Upload an audio file (e.g., voice recording saying "The fire is spreading to the west wing").
+   - Watch the confidence score increase!
+4. **Action Recommendations**:
+   - Go to **Actions** tab.
+   - Get AI-driven recommendations based on the incidents.
 
 ---
 
@@ -249,83 +163,22 @@ Press `Ctrl+C` to stop.
 ```
 respond/
 ├── api/                    # FastAPI routes
-│   ├── main.py            # App entry point
-│   └── routes/            # Endpoint handlers
-├── config/                 # Configuration
-│   ├── settings.py        # Environment settings
-│   └── qdrant_config.py   # Qdrant constants
+├── config/                 # Configuration & Settings
 ├── src/
-│   ├── embeddings/        # Text embedder (MiniLM-L6)
-│   ├── evidence/          # Evidence tracer
-│   ├── ingestion/         # Incident ingester
-│   ├── memory/            # Evolution, decay, reinforcement
-│   ├── qdrant/            # Client & collections
-│   ├── recommendation/    # Action recommender
-│   └── search/            # Hybrid search & filters
-├── scripts/               # Simulation scripts
-├── frontend/              # Dashboard UI
-├── docs/                  # Documentation
-├── requirements.txt       # Python dependencies
-└── .env.example          # Environment template
+│   ├── embeddings/        # Text (MiniLM) & Image (CLIP) embedders
+│   ├── audio/             # Whisper transcriber
+│   ├── ingestion/         # Incident processing pipeline
+│   ├── memory/            # Evolution, decay, reinforcement logic
+│   ├── search/            # Hybrid search implementation
+│   └── qdrant/            # Database client
+├── frontend_basic/        # Dashboard UI (HTML/CSS/JS)
+├── docs/                  # Technical documentation
+└── requirements.txt       # Dependencies
 ```
 
 ---
 
-## 🔧 Troubleshooting
-
-### "Connection refused" error
-- Make sure the API is running: `uvicorn api.main:app --reload`
-- Check if port 8000 is available
-
-### "Cannot connect to Qdrant"
-- Verify your `.env` has correct `QDRANT_URL` and `QDRANT_API_KEY`
-- Check if your Qdrant cluster is running at [cloud.qdrant.io](https://cloud.qdrant.io/)
-
-### "Module not found" error
-- Make sure virtual environment is activated: `source venv/bin/activate`
-- Reinstall dependencies: `pip install -r requirements.txt`
-
-### Reset all data
-```bash
-curl -X DELETE http://127.0.0.1:8000/reset
-```
-
----
-
-## 🏗️ Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Vector Database | Qdrant Cloud |
-| Embeddings | sentence-transformers/all-MiniLM-L6-v2 |
-| Backend | FastAPI + Pydantic |
-| Frontend | Vanilla HTML/CSS/JS |
-| Python | 3.10+ |
-
----
-
-## 📄 Documentation
-
-- [Final Report](docs/FINAL_REPORT.md) — Technical documentation
-- [Architecture](docs/architecture.md) — System design details
-- [Submission Checklist](SUBMISSION_CHECKLIST.md) — Demo preparation
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push: `git push origin feature/my-feature`
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-MIT License
-
----
-
-*Built with ❤️ for Convolve 4.0 | Qdrant MAS Track*
+## � Documentation Links
+- **[Judge's Guide](JUDGE_GUIDE.md)** - Simplified run instructions.
+- **[Technical Documentation](docs/TECHNICAL_DOCUMENTATION.md)** - Deep dive into architecture.
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Cloud deployment steps.
