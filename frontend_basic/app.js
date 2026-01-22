@@ -1,5 +1,6 @@
 /**
  * RESPOND Dashboard - Professional Frontend
+ * Includes: Phase 11 (Dedup), Phase 12 (Images), Phase 13 (Audio), Phase 14/15 (Deployments)
  */
 
 // Configure API_BASE: set window.API_BASE before loading this script for production
@@ -22,6 +23,32 @@ const actionsSection = document.getElementById('actionsSection');
 const actionsContainer = document.getElementById('actionsContainer');
 const sortSelect = document.getElementById('sortSelect');
 const lastIngestTime = document.getElementById('lastIngestTime');
+
+// =====================
+// Tab Navigation
+// =====================
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // Remove active from all buttons
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+      tab.style.display = 'none';
+      tab.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const tabId = btn.getAttribute('data-tab') + '-tab';
+    const tabContent = document.getElementById(tabId);
+    if (tabContent) {
+      tabContent.style.display = 'grid';
+      tabContent.classList.add('active');
+    }
+  });
+});
 
 // =====================
 // API Functions
@@ -69,12 +96,62 @@ async function recommendActions(query, limit = 5, zoneId = null) {
   return response.json();
 }
 
+// Phase 12: Image Upload
+async function uploadImage(incidentId, file, imageType, zoneId) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('image_type', imageType);
+  if (zoneId) formData.append('zone_id', zoneId);
+  
+  const response = await fetch(`${API_BASE}/ingest/incident/${incidentId}/image`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) throw new Error((await response.json()).detail || 'Image upload failed');
+  return response.json();
+}
+
+// Phase 13: Audio Upload
+async function uploadAudio(incidentId, file, sourceType) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('source_type', sourceType);
+  
+  const response = await fetch(`${API_BASE}/memory/incident/${incidentId}/reinforce_audio`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) throw new Error((await response.json()).detail || 'Audio upload failed');
+  return response.json();
+}
+
+// Phase 15: Deployments
+async function createDeployment(data) {
+  const response = await fetch(`${API_BASE}/deployments/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error((await response.json()).detail || 'Deployment creation failed');
+  return response.json();
+}
+
+async function updateDeploymentStatus(deploymentId, status, notes) {
+  const response = await fetch(`${API_BASE}/deployments/${deploymentId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, notes }),
+  });
+  if (!response.ok) throw new Error((await response.json()).detail || 'Status update failed');
+  return response.json();
+}
+
 // =====================
 // UI Helpers
 // =====================
 
 function showResult(element, message, isError = false) {
-  element.textContent = message;
+  element.innerHTML = message;
   element.className = `result-box ${isError ? 'error' : 'success'}`;
 }
 
@@ -184,6 +261,7 @@ function renderIncidentCard(result) {
         </select>
         <button class="btn btn-small btn-secondary" onclick="handleStatusUpdate('${id}')">Update</button>
         ${payload.status === 'pending' ? `<button class="btn btn-small btn-success" onclick="quickAcknowledge('${id}')">✓ Acknowledge</button>` : ''}
+        <button class="btn btn-small btn-info" onclick="copyIncidentId('${id}')">📋 Copy ID</button>
       </div>
     </div>
   `;
@@ -270,8 +348,13 @@ window.quickAcknowledge = async function (id) {
   }
 };
 
+window.copyIncidentId = function (id) {
+  navigator.clipboard.writeText(id);
+  alert(`✓ Copied: ${id}`);
+};
+
 // =====================
-// Event Listeners
+// Event Listeners - Incidents
 // =====================
 
 ingestForm.addEventListener('submit', async (e) => {
@@ -292,7 +375,17 @@ ingestForm.addEventListener('submit', async (e) => {
 
   try {
     const result = await ingestIncident(data);
-    showResult(ingestResult, `✓ Ingested: ${result.incident_id.substring(0, 8)}...`);
+    
+    // Phase 11: Show deduplication status
+    const isDeduplicated = result.message.includes('deduplicated');
+    const icon = isDeduplicated ? '🔄' : '✓';
+    const statusText = isDeduplicated ? 'DEDUPLICATED' : 'NEW';
+    
+    showResult(ingestResult, `
+      ${icon} <strong>${statusText}</strong>: ${result.incident_id.substring(0, 12)}...<br>
+      <small>${result.message}</small>
+    `);
+    
     lastIngestTime.textContent = `Last ingest: just now`;
     document.getElementById('text').value = '';
   } catch (error) {
@@ -353,8 +446,139 @@ sortSelect.addEventListener('change', (e) => {
 });
 
 // =====================
+// Event Listeners - Image Upload (Phase 12)
+// =====================
+
+document.getElementById('imageUploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultEl = document.getElementById('imageUploadResult');
+  hideResult(resultEl);
+  
+  const incidentId = document.getElementById('image_incident_id').value;
+  const file = document.getElementById('image_file').files[0];
+  const imageType = document.getElementById('image_type').value;
+  const zoneId = document.getElementById('image_zone_id').value;
+  
+  if (!file) {
+    showResult(resultEl, '✗ Please select an image file', true);
+    return;
+  }
+  
+  try {
+    showResult(resultEl, '⏳ Uploading and embedding image...');
+    const result = await uploadImage(incidentId, file, imageType, zoneId);
+    showResult(resultEl, `
+      ✓ <strong>Image uploaded!</strong><br>
+      <small>Image ID: ${result.image_point_id.substring(0, 12)}...</small>
+    `);
+    document.getElementById('imageUploadForm').reset();
+  } catch (error) {
+    showResult(resultEl, `✗ ${error.message}`, true);
+  }
+});
+
+// =====================
+// Event Listeners - Audio Upload (Phase 13)
+// =====================
+
+document.getElementById('audioUploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultEl = document.getElementById('audioUploadResult');
+  const transcriptEl = document.getElementById('transcriptPreview');
+  hideResult(resultEl);
+  transcriptEl.classList.add('hidden');
+  
+  const incidentId = document.getElementById('audio_incident_id').value;
+  const file = document.getElementById('audio_file').files[0];
+  const sourceType = document.getElementById('audio_source_type').value;
+  
+  if (!file) {
+    showResult(resultEl, '✗ Please select an audio file', true);
+    return;
+  }
+  
+  try {
+    showResult(resultEl, '⏳ Transcribing audio with Whisper...');
+    const result = await uploadAudio(incidentId, file, sourceType);
+    
+    const acceptedIcon = result.accepted ? '✅' : '❌';
+    showResult(resultEl, `
+      ${acceptedIcon} <strong>${result.accepted ? 'Reinforcement Accepted' : 'Reinforcement Rejected'}</strong><br>
+      <small>Similarity: ${(result.similarity * 100).toFixed(1)}% | Confidence: ${result.old_confidence?.toFixed(2)} → ${result.new_confidence?.toFixed(2)}</small>
+    `);
+    
+    // Show transcript
+    if (result.transcript) {
+      transcriptEl.innerHTML = `
+        <h4>📝 Transcript</h4>
+        <p>${result.transcript}</p>
+      `;
+      transcriptEl.classList.remove('hidden');
+    }
+    
+    document.getElementById('audioUploadForm').reset();
+  } catch (error) {
+    showResult(resultEl, `✗ ${error.message}`, true);
+  }
+});
+
+// =====================
+// Event Listeners - Deployments (Phase 15)
+// =====================
+
+document.getElementById('deploymentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultEl = document.getElementById('deploymentResult');
+  hideResult(resultEl);
+  
+  const incidentIdsRaw = document.getElementById('deploy_incident_ids').value;
+  const incidentIds = incidentIdsRaw.split(',').map(id => id.trim()).filter(id => id);
+  
+  const data = {
+    action_type: document.getElementById('deploy_action_type').value,
+    incident_ids: incidentIds,
+    assigned_unit: document.getElementById('deploy_assigned_unit').value,
+    zone_id: document.getElementById('deploy_zone_id').value || null,
+    notes: document.getElementById('deploy_notes').value || null,
+  };
+  
+  try {
+    const result = await createDeployment(data);
+    showResult(resultEl, `
+      🚀 <strong>Deployment Created!</strong><br>
+      <small>ID: ${result.deployment_id.substring(0, 12)}... | Unit: ${result.assigned_unit}</small>
+    `);
+    document.getElementById('deploymentForm').reset();
+  } catch (error) {
+    showResult(resultEl, `✗ ${error.message}`, true);
+  }
+});
+
+document.getElementById('updateDeploymentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const resultEl = document.getElementById('updateDeploymentResult');
+  hideResult(resultEl);
+  
+  const deploymentId = document.getElementById('update_deployment_id').value;
+  const status = document.getElementById('update_status').value;
+  const notes = document.getElementById('update_notes').value;
+  
+  try {
+    const result = await updateDeploymentStatus(deploymentId, status, notes);
+    showResult(resultEl, `
+      ✓ <strong>Status Updated!</strong><br>
+      <small>${result.old_status} → ${result.new_status}</small>
+    `);
+    document.getElementById('updateDeploymentForm').reset();
+  } catch (error) {
+    showResult(resultEl, `✗ ${error.message}`, true);
+  }
+});
+
+// =====================
 // Initialize
 // =====================
 
 console.log('🚨 RESPOND Dashboard initialized');
 console.log('📡 API Base:', API_BASE);
+console.log('✅ Features: Dedup, Images (CLIP), Audio (Whisper), Deployments');

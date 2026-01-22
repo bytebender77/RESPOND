@@ -24,147 +24,291 @@
     </div>
   </header>
 
+  <!-- Tab Navigation -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="incidents">📋 Incidents</button>
+    <button class="tab-btn" data-tab="media">🖼️ Media (Image/Audio)</button>
+    <button class="tab-btn" data-tab="deployments">🚒 Deployments</button>
+  </nav>
+
   <!-- Main Content -->
   <main class="main-container">
-    <!-- Left Panel: Ingest Form -->
-    <section class="panel left-panel">
-      <h2>📥 Ingest Incident</h2>
-      <form id="ingestForm" class="form">
-        <div class="form-group">
-          <label for="text">Incident Description</label>
-          <textarea id="text" placeholder="Describe the incident..." required></textarea>
+    <!-- TAB 1: Incidents (Ingest + Search) -->
+    <div id="incidents-tab" class="tab-content active">
+      <!-- Left Panel: Ingest Form -->
+      <section class="panel left-panel">
+        <h2>📥 Ingest Incident</h2>
+        <p class="panel-subtitle">Auto-deduplication enabled</p>
+        <form id="ingestForm" class="form">
+          <div class="form-group">
+            <label for="text">Incident Description</label>
+            <textarea id="text" placeholder="Describe the incident..." required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="source_type">Source</label>
+              <select id="source_type" required>
+                <option value="social">Social</option>
+                <option value="sensor">Sensor</option>
+                <option value="call">Call</option>
+                <option value="report">Report</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="urgency">Urgency</label>
+              <select id="urgency" required>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium" selected>Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status">
+                <option value="pending" selected>Pending</option>
+                <option value="acknowledged">Acknowledged</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="zone_id">Zone ID</label>
+              <input type="text" id="zone_id" placeholder="zone-1" value="zone-1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="lat">Latitude</label>
+              <input type="number" id="lat" step="0.0001" value="28.6139">
+            </div>
+
+            <div class="form-group">
+              <label for="lon">Longitude</label>
+              <input type="number" id="lon" step="0.0001" value="77.2090">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Submit Incident</button>
+        </form>
+
+        <div id="ingestResult" class="result-box"></div>
+      </section>
+
+      <!-- Right Panel: Search & Results -->
+      <section class="panel right-panel">
+        <h2>🔍 Search Incidents</h2>
+        <form id="searchForm" class="form">
+          <div class="form-group">
+            <label for="query">Search Query</label>
+            <input type="text" id="query" placeholder="e.g., fire emergency trapped..." required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="search_last_hours">Last Hours</label>
+              <input type="number" id="search_last_hours" value="24">
+            </div>
+
+            <div class="form-group">
+              <label for="search_limit">Limit</label>
+              <input type="number" id="search_limit" value="10">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="search_urgency">Urgency</label>
+              <select id="search_urgency">
+                <option value="">All</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="search_status">Status</label>
+              <select id="search_status">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="acknowledged">Acknowledged</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">🔍 Search</button>
+            <button type="button" id="recommendBtn" class="btn btn-secondary">🎯 Recommend Actions</button>
+          </div>
+        </form>
+
+        <!-- Results Header -->
+        <div class="results-header" id="resultsHeader" style="display: none;">
+          <h3 id="resultsTitle">0 incidents found</h3>
+          <select class="sort-select" id="sortSelect">
+            <option value="final_score">Sort by: Relevance</option>
+            <option value="confidence_score">Sort by: Confidence</option>
+            <option value="age_seconds">Sort by: Newest</option>
+          </select>
         </div>
 
-        <div class="form-row">
+        <!-- Results Section -->
+        <div id="resultsContainer" class="results-container">
+          <div class="empty-state">
+            <div class="empty-state-icon">🔍</div>
+            <p>Enter a search query to find incidents</p>
+          </div>
+        </div>
+
+        <!-- Actions Section -->
+        <div id="actionsSection" class="actions-section hidden">
+          <h3>🎯 Recommended Actions</h3>
+          <div id="actionsContainer" class="actions-container"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: Media Upload (Images + Audio) -->
+    <div id="media-tab" class="tab-content" style="display: none;">
+      <section class="panel">
+        <h2>🖼️ Upload Image Evidence</h2>
+        <p class="panel-subtitle">Attach images to existing incidents using CLIP (512-dim)</p>
+        <form id="imageUploadForm" class="form">
           <div class="form-group">
-            <label for="source_type">Source</label>
-            <select id="source_type" required>
-              <option value="social">Social</option>
-              <option value="sensor">Sensor</option>
-              <option value="call">Call</option>
-              <option value="report">Report</option>
+            <label for="image_incident_id">Incident ID</label>
+            <input type="text" id="image_incident_id" placeholder="Paste incident UUID..." required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="image_file">Image File</label>
+              <input type="file" id="image_file" accept="image/*" required>
+            </div>
+            <div class="form-group">
+              <label for="image_type">Image Type</label>
+              <select id="image_type">
+                <option value="photo">Photo</option>
+                <option value="satellite">Satellite</option>
+                <option value="drone">Drone</option>
+                <option value="cctv">CCTV</option>
+                <option value="screenshot">Screenshot</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="image_zone_id">Zone ID (optional)</label>
+            <input type="text" id="image_zone_id" placeholder="zone-1">
+          </div>
+          <button type="submit" class="btn btn-primary">📤 Upload Image</button>
+        </form>
+        <div id="imageUploadResult" class="result-box"></div>
+      </section>
+
+      <section class="panel">
+        <h2>🎙️ Upload Audio Evidence</h2>
+        <p class="panel-subtitle">Transcribe audio with Whisper and reinforce incidents</p>
+        <form id="audioUploadForm" class="form">
+          <div class="form-group">
+            <label for="audio_incident_id">Incident ID</label>
+            <input type="text" id="audio_incident_id" placeholder="Paste incident UUID..." required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="audio_file">Audio File</label>
+              <input type="file" id="audio_file" accept="audio/*" required>
+            </div>
+            <div class="form-group">
+              <label for="audio_source_type">Source Type</label>
+              <select id="audio_source_type">
+                <option value="call">Emergency Call</option>
+                <option value="radio">Radio</option>
+                <option value="recording">Recording</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">🎤 Transcribe & Reinforce</button>
+        </form>
+        <div id="audioUploadResult" class="result-box"></div>
+        <div id="transcriptPreview" class="transcript-preview hidden"></div>
+      </section>
+    </div>
+
+    <!-- TAB 3: Deployments -->
+    <div id="deployments-tab" class="tab-content" style="display: none;">
+      <section class="panel">
+        <h2>🚒 Create Deployment</h2>
+        <p class="panel-subtitle">Dispatch units to incident locations</p>
+        <form id="deploymentForm" class="form">
+          <div class="form-group">
+            <label for="deploy_action_type">Action Type</label>
+            <select id="deploy_action_type">
+              <option value="DISPATCH_FIRE_UNIT">Dispatch Fire Unit</option>
+              <option value="DISPATCH_AMBULANCE">Dispatch Ambulance</option>
+              <option value="DISPATCH_POLICE">Dispatch Police</option>
+              <option value="EVACUATE_ZONE">Evacuate Zone</option>
+              <option value="MEDICAL_TEAM">Medical Team</option>
+              <option value="HAZMAT_TEAM">Hazmat Team</option>
             </select>
           </div>
-
           <div class="form-group">
-            <label for="urgency">Urgency</label>
-            <select id="urgency" required>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium" selected>Medium</option>
-              <option value="low">Low</option>
-            </select>
+            <label for="deploy_incident_ids">Incident IDs (comma-separated)</label>
+            <input type="text" id="deploy_incident_ids" placeholder="uuid1, uuid2" required>
           </div>
-        </div>
-
-        <div class="form-row">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="deploy_assigned_unit">Assigned Unit</label>
+              <input type="text" id="deploy_assigned_unit" placeholder="e.g., Fire Unit 7" required>
+            </div>
+            <div class="form-group">
+              <label for="deploy_zone_id">Zone ID</label>
+              <input type="text" id="deploy_zone_id" placeholder="zone-1">
+            </div>
+          </div>
           <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status">
-              <option value="pending" selected>Pending</option>
-              <option value="acknowledged">Acknowledged</option>
-              <option value="resolved">Resolved</option>
-            </select>
+            <label for="deploy_notes">Notes (optional)</label>
+            <textarea id="deploy_notes" placeholder="Additional instructions..."></textarea>
           </div>
+          <button type="submit" class="btn btn-primary">🚀 Create Deployment</button>
+        </form>
+        <div id="deploymentResult" class="result-box"></div>
+      </section>
 
+      <section class="panel">
+        <h2>📊 Update Deployment Status</h2>
+        <form id="updateDeploymentForm" class="form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="update_deployment_id">Deployment ID</label>
+              <input type="text" id="update_deployment_id" placeholder="Deployment UUID" required>
+            </div>
+            <div class="form-group">
+              <label for="update_status">New Status</label>
+              <select id="update_status">
+                <option value="assigned">Assigned</option>
+                <option value="en_route">En Route</option>
+                <option value="on_site">On Site</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
           <div class="form-group">
-            <label for="zone_id">Zone ID</label>
-            <input type="text" id="zone_id" placeholder="zone-1" value="zone-1">
+            <label for="update_notes">Notes</label>
+            <input type="text" id="update_notes" placeholder="Status update notes...">
           </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="lat">Latitude</label>
-            <input type="number" id="lat" step="0.0001" value="28.6139">
-          </div>
-
-          <div class="form-group">
-            <label for="lon">Longitude</label>
-            <input type="number" id="lon" step="0.0001" value="77.2090">
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Submit Incident</button>
-      </form>
-
-      <div id="ingestResult" class="result-box"></div>
-    </section>
-
-    <!-- Right Panel: Search & Results -->
-    <section class="panel right-panel">
-      <h2>🔍 Search Incidents</h2>
-      <form id="searchForm" class="form">
-        <div class="form-group">
-          <label for="query">Search Query</label>
-          <input type="text" id="query" placeholder="e.g., fire emergency trapped..." required>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="search_last_hours">Last Hours</label>
-            <input type="number" id="search_last_hours" value="24">
-          </div>
-
-          <div class="form-group">
-            <label for="search_limit">Limit</label>
-            <input type="number" id="search_limit" value="10">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="search_urgency">Urgency</label>
-            <select id="search_urgency">
-              <option value="">All</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="search_status">Status</label>
-            <select id="search_status">
-              <option value="">All</option>
-              <option value="pending">Pending</option>
-              <option value="acknowledged">Acknowledged</option>
-              <option value="resolved">Resolved</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary">🔍 Search</button>
-          <button type="button" id="recommendBtn" class="btn btn-secondary">🎯 Recommend Actions</button>
-        </div>
-      </form>
-
-      <!-- Results Header -->
-      <div class="results-header" id="resultsHeader" style="display: none;">
-        <h3 id="resultsTitle">0 incidents found</h3>
-        <select class="sort-select" id="sortSelect">
-          <option value="final_score">Sort by: Relevance</option>
-          <option value="confidence_score">Sort by: Confidence</option>
-          <option value="age_seconds">Sort by: Newest</option>
-        </select>
-      </div>
-
-      <!-- Results Section -->
-      <div id="resultsContainer" class="results-container">
-        <div class="empty-state">
-          <div class="empty-state-icon">🔍</div>
-          <p>Enter a search query to find incidents</p>
-        </div>
-      </div>
-
-      <!-- Actions Section -->
-      <div id="actionsSection" class="actions-section hidden">
-        <h3>🎯 Recommended Actions</h3>
-        <div id="actionsContainer" class="actions-container"></div>
-      </div>
-    </section>
+          <button type="submit" class="btn btn-secondary">📝 Update Status</button>
+        </form>
+        <div id="updateDeploymentResult" class="result-box"></div>
+      </section>
+    </div>
   </main>
 
   <script src="app.js"></script>
