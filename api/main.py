@@ -10,6 +10,7 @@ from api.routes.search import router as search_router
 from api.routes.memory import router as memory_router
 from api.routes.recommend import router as recommend_router
 from api.routes.images import router as images_router
+from api.routes.audio import router as audio_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -33,10 +34,12 @@ app.include_router(search_router)
 app.include_router(memory_router)
 app.include_router(recommend_router)
 app.include_router(images_router)
+app.include_router(audio_router)
 
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
     return {"status": "ok"}
+
 
