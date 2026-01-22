@@ -112,5 +112,4 @@ From the Dashboard ([http://localhost:3000](http://localhost:3000)):
 
 *   **[Judge's Guide](JUDGE_GUIDE.md)**: Simplified instructions for evaluation.
 *   **[Demo Scenarios](demo/DEMO_TEST_SCENARIOS.md)**: Copy-paste incidents for testing.
-*   **[Video Script](VIDEO_DEMO_SCRIPT.md)**: Narration script for the demo video.
 *   **[Technical Docs](docs/TECHNICAL_DOCUMENTATION.md)**: Architecture deep dive.
